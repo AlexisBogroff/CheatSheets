@@ -1,0 +1,188 @@
+# Coders Strike Back: multi bots control
+# Credit: Alexis Bogroff
+# alexis.bogroff.contact@gmail.com
+
+import sys
+import math
+import pandas as pd
+
+# V0: handles n bots, skeleton, dumb strat ok
+
+class Env:
+    """
+    Class gathering map informations
+    """
+    def __init__(self):
+        self._lst_cp_x = []
+        self._lst_cp_y = []
+        self._cps_count = None
+        self.laps = None
+        
+        
+    def get_cp_pos(self, cp_id):
+        """ Obtain x,y for a given cp """
+        x = self._lst_cp_x[cp_id]
+        y = self._lst_cp_y[cp_id]
+        return (x, y)
+        
+        
+    def set_cps_lists(self, input):
+        """
+        Retrieve cp positions from game input
+        """
+        # Get input
+        for i in range(self._cps_count):
+            pos_cp = [int(j) for j in input().split()]
+            self._lst_cp_x.append(pos_cp[0])
+            self._lst_cp_y.append(pos_cp[1])
+                
+
+    def set_cp_count(self, input):
+        """ Retrieve cp count from game input """
+        self._cps_count = int(input())
+        
+        
+    def set_laps(self, input):
+        self.laps = int(input())
+    
+
+
+class Agent:
+    """
+    Mother class of Pod and Opponent
+    Gather information on agents
+    """
+    counter_id = 0
+
+    def __init__(self):
+        self.x = None
+        self.y = None
+        self.vx = None
+        self.vy = None
+        self.angle = None
+        self.cp_id = None
+        self.cp_x = None
+        self.cp_y = None
+        
+        # Increment counter
+        Agent.counter_id += 1
+        self.id = Agent.counter_id
+
+
+    def set_cp(self, curr_cp_id, env):
+        """ Set current cp position given cp_ip """
+        self.cp_x, self.cp_y = env.get_cp_pos(curr_cp_id)
+
+    def get_game_loop_infos(self, input):
+        """ Retrieve game loop informations """
+        
+        # Retrieve infos
+        infos = [int(j) for j in input().split()]
+        
+        # Parse infos
+        self.x = infos[0];    self.y = infos[1]
+        self.vx = infos[2];   self.vy = infos[3]
+        self.angle = infos[4]
+        self.cp_id = infos[5]
+
+    def dispaly_infos(self, verbose = 1):
+        """ Display infos """
+        if verbose == 1:
+            # Agent cp infos
+            print("cp_target: {} - ({}) ({})".format(self.cp_id, self.cp_x, self.cp_y), file=sys.stderr)
+                    
+        if verbose == 2:
+            # Agent spacial infos
+            print("\n-- Agent infos --", file=sys.stderr)
+            print("\tPos: {} {}".format(self.x, self.y), file=sys.stderr)
+            print("\tSpeed: {} {}".format(self.vx, self.vy), file=sys.stderr)
+            print("\tAngle: {}".format(self.angle), file=sys.stderr)
+
+
+
+class Opponent(Agent):
+    """ Class for opponents' information """
+    def __init__(self):
+        Agent.__init__(self)
+
+
+
+class Pod(Agent):
+    """
+    Main class controlling the pod and
+    aggrregating informations from the game
+    """
+    def __init__(self):
+        Agent.__init__(self)
+        self.target_x = None
+        self.target_y = None
+        self.thrust = None
+        self.strat = None
+
+    def _exe_strat(self):
+        """ Execute action given target x,y and thrust """
+        x = self.target_x
+        y = self.target_y
+        thrust = self.thrust
+        print("{x} {y} {thrust}".format(x=x, y=y, thrust=thrust))
+
+    def strat_dumb(self):
+        """
+        Strategy consisting of always going toward the next cp
+        and at the same speed
+        """
+        # Set params
+        self.target_x = self.cp_x
+        self.target_y = self.cp_y
+        self.thrust = 100
+        
+        # Keep record
+        self.strat = 'dumb'
+        
+        # Execute strat
+        self._exe_strat()
+
+
+    def dispaly_infos(self):
+        """ Display low level infos (pos) and high level (strategy) """
+        # High level infos
+        print("*** Pod {} ***".format(self.id), file=sys.stderr)
+        print("Strat: {}".format(self.strat), file=sys.stderr)
+
+        # Low level infos
+        Agent.dispaly_infos(self, verbose = 1)
+
+    
+
+# ==========================================
+#                MAIN
+# ==========================================
+
+# Instanciate classes
+env = Env()
+pods = [Pod(), Pod()]
+opponents = [Opponent(), Opponent()]
+
+# Retrieve game init information
+env.set_laps(input)
+env.set_cp_count(input)
+env.set_cps_lists(input)
+
+
+# game loop
+while True:
+
+    # Retrieve game loop info:
+    # x, y, vx, vy, angle, cp_id
+    for agent in pods + opponents:
+        agent.get_game_loop_infos(input)
+
+    # Set new variables
+    for agent in pods + opponents:
+        agent.set_cp(agent.cp_id, env)
+
+    # Execute dumb strat
+    for pod in pods:
+        pod.strat_dumb()
+        pod.dispaly_infos()
+
