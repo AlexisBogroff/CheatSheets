@@ -96,16 +96,16 @@ class Agent:
         # * State categories
         
         # Speed
-        self.CAT_SPEED_SLOW     = 1000
-        self.CAT_SPEED_MEDIUM   = 1400
-        self.CAT_SPEED_FAST     = 2000
-        self.CAT_SPEED_VERYFAST = 3000
+        self.CAT_SPEED_SLOW     = 100
+        self.CAT_SPEED_MEDIUM   = 300
+        self.CAT_SPEED_FAST     = 550
+        self.CAT_SPEED_VERYFAST = 650
         # Distance
         self.CAT_DIST_CONTACT = 400
         self.CAT_DIST_CP_AREA = 600
-        self.CAT_DIST_CLOSE   = 1200
-        self.CAT_DIST_FAR     = 2400
-        self.CAT_DIST_VERYFAR = 4500
+        self.CAT_DIST_CLOSE   = 3200
+        self.CAT_DIST_FAR     = 4000
+        self.CAT_DIST_VERYFAR = 6500
         # Angle
         self.CAT_ANGLE_STRAIGHT = 4
         self.CAT_ANGLE_SMOOTH = 10
@@ -155,7 +155,7 @@ class Agent:
         """
         cols_part_1 = ['x', 'y', 'vx', 'vy', 'cp_id', 'cp_angle']
         cols_part_2 = ['cp_x', 'cp_y', 'dist_bros', 'dist_opponents']
-        self.history = pd.DataFrame(cols_part_1 + cols_part_2)
+        self.history = pd.DataFrame(columns = cols_part_1 + cols_part_2)
 
 
     def append_history(self):
@@ -198,19 +198,19 @@ class Agent:
         # is positioned on different quarters of the gradient
         # circle, the resulting angle must be added
         # the corresponding quarter (0, 90, 180, 270)
-        if B[0] > A[0] and B[1] < A[1]:
+        if B[0] > A[0] and B[1] <= A[1]:
             C = (B[0], A[1])
             BAC = 0
         
-        elif B[0] < A[0] and B[1] < A[1]:
+        elif B[0] <= A[0] and B[1] < A[1]:
             C = (A[0], B[1])
             BAC = 90
 
-        elif B[0] < A[0] and B[1] > A[1]:
+        elif B[0] < A[0] and B[1] >= A[1]:
             C = (B[0], A[1])
             BAC = 180
 
-        if B[0] > A[0] and B[1] > A[1]:
+        elif B[0] >= A[0] and B[1] > A[1]:
             C = (A[0], B[1])
             BAC = 270
 
@@ -358,7 +358,7 @@ class Pod(Agent):
         agent_cols = ['x', 'y', 'vx', 'vy', 'cp_id', 'cp_angle', 'cp_x', 'cp_y']
         pod_cols1 = ['target_x', 'target_y', 'thrust', 'strat', 'boost_available']
         pod_cols2 = ['speed', 'dist_bros', 'dist_opponents']
-        self.history = pd.DataFrame(agent_cols + pod_cols1 + pod_cols2)
+        self.history = pd.DataFrame(columns = agent_cols + pod_cols1 + pod_cols2)
 
 
     def append_history(self):
@@ -436,13 +436,11 @@ class Pod(Agent):
         print("dist", self.dist_cp, file=sys.stderr)
         print("speed", self.speed, file=sys.stderr)
         print("angle relative", self.cp_angle, file=sys.stderr)
-        print("angle absolu", self.angle, file=sys.stderr)
-        print("\n", file=sys.stderr)
         # Proximity to cp max
         if self.dist_cp <= self.CAT_DIST_CLOSE:
             #TODO: what if going from there?
             # elif going toward (approaching)
-            if self.speed <= self.CAT_SPEED_FAST:
+            if self.speed <= self.CAT_SPEED_SLOW:
                 # Slow > go straight @ medium thrust
                 self.strat_fc = self.strat_mollo
             else:
@@ -450,15 +448,22 @@ class Pod(Agent):
                 self.strat_fc = self.strat_break_drift
         
         elif self.dist_cp <= self.CAT_DIST_FAR:
-            if self.speed <= self.CAT_SPEED_VERYFAST:
+            if self.speed <= self.CAT_SPEED_FAST:
                 # Medium/Fast > go straight @ full thrust
                 self.strat_fc = self.strat_full_straight
             else:
                 # VeryFast > Full thrust in opposite direction (to brake)
                 self.strat_fc = self.strat_break_drift
         
-        else:
+        elif self.dist_cp <= self.CAT_DIST_VERYFAR:
             # VeryFar
+            if abs(self.cp_angle) < self.CAT_ANGLE_CURVE:
+                self.strat_fc = self.strat_full_straight
+            else:
+                # Slightly desaxed > go mollo
+                self.strat_fc = self.strat_mollo
+
+        else:
             if abs(self.cp_angle) < self.CAT_ANGLE_SMOOTH:
                 # Aligned > Straight and full power (or boost)
                 if self.boost_available:
@@ -469,10 +474,7 @@ class Pod(Agent):
             elif abs(self.cp_angle) < self.CAT_ANGLE_CURVE:
                 # Slightly desaxed > go mollo
                 self.strat_fc = self.strat_mollo
-            else:
-                # Completely messed-up > cut gaz and turn-back
-                self.strat_fc = self.strat_temporize
-        
+
 
 
     def update_state_info(self, input, env):
@@ -524,6 +526,7 @@ class Pod(Agent):
         self.target_y = self.cp_y
         self.thrust = 'BOOST'
         self.strat = 'BOOST'
+        self.boost_available = False
 
     def strat_temporize(self):
         """ Quasi-stop thrust and put nose straight """
@@ -534,8 +537,13 @@ class Pod(Agent):
 
     def strat_break_drift(self):
         """ Full thrust in opposite direction (to break) """
-        self.target_x = self.cp_x
-        self.target_y = self.cp_y
+        try:
+            self.target_x = self.history.iloc[-1]['x']
+            self.target_y = self.history.iloc[-1]['y']
+        except:
+            self.target_x = self.x
+            self.target_y = self.y
+        
         self.thrust = 100
         self.strat = 'break_drift'
 
