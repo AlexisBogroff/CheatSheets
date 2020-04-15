@@ -134,3 +134,6 @@ settings.json
 
 # data
 data/
+
+# Debug files
+*debug.py
