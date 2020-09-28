@@ -1,3 +1,0 @@
-pseudo: pseu
-password: pss
-db_name: dbou
