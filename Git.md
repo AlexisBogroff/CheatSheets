@@ -22,3 +22,10 @@ git remote add origin "https://github.com/<MyAccount>/<repository_name>.git"
 git push -u origin master
 ```
 
+## Branches
+### Rename a branch
+```
+git checkout <current_branch_name>
+git branch -m <new_branch_name>
+git push origin -u <new_branch_name>
+```
