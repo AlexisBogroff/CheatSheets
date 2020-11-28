@@ -6,6 +6,7 @@ setup.cfg
 
 ### Containing:
 [metadata]
+
 name = <name_package>
 
 
@@ -14,6 +15,7 @@ setup.py
 
 ### Containing:
 from setuptools import setup
+
 setup()
 
 
