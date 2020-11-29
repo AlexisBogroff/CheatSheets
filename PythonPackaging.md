@@ -5,7 +5,7 @@ Requires setuptools and wheels packages
 
 ## What your package should contain
 
-### Package structure
+Package structure
 ```
 package_name/
     setup.py
@@ -14,9 +14,7 @@ package_name/
           module1.py
 ```
 
-### Adding just one file enable the build
-setup.py
-
+The added file setup.py enables the build
 ``` python
 from setuptools import setup
 
@@ -28,15 +26,16 @@ setup(
 ```
 
 ## Commands to make the build
-### Create the source distribution
+
+Create the source distribution
 ``` python
 python setup.py sdist
 ```
-### Build the distribution wheel
+Build the distribution wheel
 ``` python
 python setup.py bdist_wheel
 ```
-### Build the package
+Build the package
 ``` python
 python setup.py build
 ```
