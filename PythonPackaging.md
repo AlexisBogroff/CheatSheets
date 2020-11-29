@@ -40,9 +40,9 @@ Build the package
 python setup.py build
 ```
 
-## Install the package:
+## Install the package
 
-Static mode: if you modify the package, you need to reinstall.
+Static mode: if you modify the package, you need to reinstall
 ``` python
 python setup.py install
 ```
