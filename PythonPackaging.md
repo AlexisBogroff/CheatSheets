@@ -41,6 +41,13 @@ python setup.py build
 ```
 
 ## Install the package:
+
+Static mode: if you modify the package, you need to reinstall.
 ``` python
 python setup.py install
+```
+
+Dynamic mode: each new import will get the latest version
+``` python
+python setup.py develop
 ```
