@@ -93,15 +93,26 @@ If you want to ignore certain files on every repository on your machine you can 
 ex: git config --global core.excludesfile ~/.gitignore_global
 
 ## 2020-11
-git remote -v   # to know the address that is set for the repository
-
+Get the address that is set for the repository
+```
+git remote -v
+```
+Set address of the shortcut "origin" to correspond with the repository's
+```
 git remote set-url origin [new_address]
+```
+List all local branches
+```
+git branch --list
+```
 
-git branch --list  # list all local branches
+Det the name of the current branch
+```
+git symbolic-ref HEAD
+```
 
-git symbolic-ref HEAD  # get the name of the current branch
-
-### delete untracked files
+Delete untracked files
+```
 git clean -df  
-
 git checkout -- .
+```
