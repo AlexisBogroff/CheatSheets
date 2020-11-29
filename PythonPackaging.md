@@ -1,7 +1,11 @@
 # Minimalistic Procedure
-_Requires setuptools and wheels packages_
+_from https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html_
 
-## Package structure
+Requires setuptools and wheels packages
+
+## What your package should contain
+
+### Package structure
 ```
 package_name/
     setup.py
@@ -10,7 +14,7 @@ package_name/
           module1.py
 ```
 
-## Create file
+### Adding just one file enable the build
 setup.py
 
 ``` python
@@ -23,7 +27,7 @@ setup(
 )
 ```
 
-## Make the build
+## Commands to make the build
 ### Create the source distribution
 ``` python
 python setup.py sdist
