@@ -72,10 +72,15 @@ git branch -a  # see all branches (including remotes)
 
 ## Replace a branch content by another's (master by dev)
 git checkout dev  # it creates the branch dev if it didn't exist
+
 git merge --strategy=ours master    # keep the content of this branch, but record a merge
+
 git checkout master
+
 git merge dev             # fast-forward master up to the merge
+
 git push
+
 git reset --soft HEAD~  # undo a commit that was not pushed
 
 
@@ -89,6 +94,14 @@ ex: git config --global core.excludesfile ~/.gitignore_global
 
 ## 2020-11
 git remote -v   # to know the address that is set for the repository
+
 git remote set-url origin [new_address]
+
 git branch --list  # list all local branches
+
 git symbolic-ref HEAD  # get the name of the current branch
+
+### delete untracked files
+git clean -df  
+
+git checkout -- .
