@@ -190,3 +190,8 @@ Delete untracked files
 git clean -df  
 git checkout -- .
 ```
+
+Get the list of remotes URLs that are registered locally
+```
+git remote -v
+```
