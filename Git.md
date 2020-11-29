@@ -17,6 +17,7 @@ git branch -M master
 - Click "New repository" ("+" sign on top right at time of writting nov-2020)
 - Write a name and click Create repository
 - Copy the link of the form "https://github.com/<MyAccount>/<repository_name>.git"
+
 ```
 git remote add origin "https://github.com/<MyAccount>/<repository_name>.git"
 git push -u origin master
@@ -30,62 +31,135 @@ git branch -m <new_branch_name>
 git push origin -u <new_branch_name>
 ```
 
-# TODO: reorganize
-git pull  # retrieve repo
-git status  # get amended files
-git diff <fname>  # get amended rows in the file specified
+Retrieve repo
+```
+git pull  
+```
 
-git add  # ps: todo 1 file at a time, add to the temp transfer folder
-git commit -m "<comment>"  # add comment to the change
-git push  # update git repo
+Get amended files
+```
+git status
+```
 
-git log  # verify the change and commit
+Get amended rows in the file specified
+```
+git diff <fname>
+```
+
+Add files to the tracking list
+```
+git add <file_name>  # a specific file
+git add .            # all the files
+```
+
+Add comment to the change and commit
+```
+git commit -m "<comment>"
+```
+
+Update git repo: this is the crucial step that impacts the remote repository, careful
+```
+git push
+```
+
+Verify the change and commit
+```
+git log
+```
 
 
-2019-12:
-git push origin --delete <name>  # delete a remote branch
-git branch -d <name>  # delete a local branch
-git revert HEAD~1  # revert the last commit
+## 2019-12
+Delete a remote branch
+```
+git push origin --delete <name>
+```
 
+Delete a local branch
+```
+git branch -d <name>
+```
 
-2020-01:
-git checkout <branch>  # change active branch with an existing one
-git checkout -b <new_branch>  # change active branch with an existing one
-git push -u origin <new_branch>  # build the remote branch
-git branch -D <branch_name>  # delete a local branch
+Revert the last commit
+```
+git revert HEAD~1
+```
 
-## Push changes to the remote branch
+## 2020-01
+Change active branch with an existing one
+```
+git checkout <branch>
+```
+
+Change active branch with an existing one
+```
+git checkout -b <new_branch>
+```
+
+Build the remote branch
+```
+git push -u origin <new_branch>
+```
+
+Delete a local branch
+```
+git branch -D <branch_name>
+```
+
+### Push changes to the remote branch
+```
 git add -A  # stage all changes
 git commit -am "commit message"
 git push
+```
 
-## Remove local untracked files
-git clean -n  # see what would be deleted
-git clean -f  # actually delete the files
+### Remove local untracked files
+See what would be deleted
+```
+git clean -n
+```
 
-## Stop tracking a file
+Actually delete the files
+```
+git clean -f
+```
+
+Stop tracking a file
+```
 git rm --cached <file_name> -r  # -r for recursive folder
+```
 
 
 ## 2020-04
-git branch -a  # see all branches (including remotes)
+See all branches (including remotes)
+```
+git branch -a
+```
 
 ## Replace a branch content by another's (master by dev)
-git checkout dev  # it creates the branch dev if it didn't exist
+Create the branch dev if it didn't exist
+```
+git checkout dev  
+```
 
-git merge --strategy=ours master    # keep the content of this branch, but record a merge
-
+Keep the content of this branch, but record a merge
+```
+git merge --strategy=ours master
 git checkout master
+```
 
-git merge dev             # fast-forward master up to the merge
-
+Fast-forward master up to the merge
+```
+git merge dev
 git push
+```
 
-git reset --soft HEAD~  # undo a commit that was not pushed
-
+Undo a commit that was not pushed (tracked and committed but not pushed)
+```
+git reset --soft HEAD~
+```
 
 ## 2020-09
-.gitignore subtleties:
+### About .gitignore
 
 If you want to ignore files in just one repository but want to avoid committing the ignore list (for example for personal files) you can add them to .git/info/exclude in that repository.
 
@@ -106,7 +180,7 @@ List all local branches
 git branch --list
 ```
 
-Det the name of the current branch
+Get the name of the current branch
 ```
 git symbolic-ref HEAD
 ```
