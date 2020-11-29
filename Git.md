@@ -135,7 +135,7 @@ See all branches (including remotes)
 git branch -a
 ```
 
-## Replace a branch content by another's (master by dev)
+### Replace a branch content by another's (master by dev)
 Create the branch dev if it didn't exist
 ```
 git checkout dev  
