@@ -51,11 +51,21 @@ the files should look like that :
           /django_project/myproject
                          /mysite
 ```
+```shell
+home
+|-- user
+    |-- env
+    |-- django_project
+        |-- myproject
+        |-- mysite
+```
 knowing that mysite is the app created to code the project and myproject contains the "settings.py", "wsgi.py" and "urls.py" that are originally created when creating a new Django project.
+
+I wrote it in two different ways in case it was not clear.
 
 ---
 
-## *X*. Set up Gunicorn
+## III Set up Gunicorn
 
 First thing first, we need to intsall Gunicorn if it hasen't been done yet.
 
@@ -192,10 +202,138 @@ sudo journalctl -u gunicorn.socket
 
 And in the worst case, go back to the firsts steps of the gunicorn part of this tutorial and check that you didn't missed a step or any mistake like that.
 
+## IV Set up Nginx
 
+To connect Nginx and Gunicorn, I've found two ways. Only one of them should be enough, but in the case that it does not work, refer to the second method.
 
+### First Method
 
+Nginx posseses a list of all the port that it must listen too, so the dirst method consists to add our Gunicorn socket to this list.
 
+To do so, we must reach the `sites-available` folder of Nginx. And we will add our Gunicorn socket.
+```shell
+sudo nano /etc/nginx/sites-available/myproject
+```
+And once in this file, we can paste this command : 
+```shell
+server {
+    listen 80;
+    server_name server_domain_or_IP;
 
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/user/django_project;
+    }
 
-https://hackmd.io/lFgvU1RnSFGwasDCFLX77g?both
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+```
+
+There are three parts in it : 
+- the first one specifies the port on which Nginx should listen (here the port 80 is the one on which the users will connect to our machine).
+- the second part does two things : it make Nginx avoid all the problems due to the search of a favicon, and it specifies the place of our static files
+- the last part specifies who the requests should be given to (in our case to Gunicorn)
+
+You can now save and leave this file.
+And now we must activate this instruction we just created.
+```shell
+sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
+```
+
+You can now try the connection.
+```shell
+sudo nginx -t
+```
+
+And if there is no mistake, then restart nginx.
+```shell
+sudo systemctl restart nginx
+```
+
+Everything should be working now !
+
+### Second method
+
+So if the first method did not work, you can try this one.
+
+In this one we will directly edit the nginx configuration file.
+So first step open it.
+```shell
+sudo nano /etc/nginx/nginx.conf
+```
+
+Once you're in it, go inside the `http` block and paste this (in other word add this to the existing file, without deleting the rest).
+```shell
+upstream test_server {
+  server unix:/var/www/test/run/gunicorn.sock fail_timeout=10s;
+}
+
+# This is not neccessary - it's just commonly used
+# it just redirects example.com -> www.example.com
+# so it isn't treated as two separate websites
+server {
+        listen 80;
+        server_name example.com;
+        return 301 $scheme://www.example.com$request_uri;
+}
+
+server {
+    listen   80;
+    server_name www.example.com;
+
+    client_max_body_size 4G;
+
+    access_log /var/www/test/logs/nginx-access.log;
+    error_log /var/www/test/logs/nginx-error.log warn;
+
+    location /static/ {
+        autoindex on;
+        alias   /var/www/test/ourcase/static/;
+    }
+
+    location /media/ {
+        autoindex on;
+        alias   /var/www/test/ourcase/media/;
+    }
+
+    location / {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+
+        if (!-f $request_filename) {
+            proxy_pass http://test_server;
+            break;
+        }
+    }
+
+    #For favicon
+    location  /favicon.ico {
+        alias /var/www/test/test/static/img/favicon.ico;
+    }
+    #For robots.txt
+    location  /robots.txt {
+        alias /var/www/test/test/static/robots.txt ;
+    }
+    # Error pages
+    error_page 500 502 503 504 /500.html;
+    location = /500.html {
+        root /var/www/test/ourcase/static/;
+    }
+}
+```
+
+I'm not entering the explanations of what happens this time, but do be carefull, because maybe some path are not correct and you will have to modify it.
+
+In the last part of this tutorial, i give you two links that helped me get through all these steps (including the one speaking about this method). You can always refer to it if needed.
+
+## Sources
+
+A usefull link that repeat all I told you, but in french : 
+https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-20-04-fr
+
+The link for the second Nginx method : 
+https://tutos.readthedocs.io/en/latest/source/ndg.html
