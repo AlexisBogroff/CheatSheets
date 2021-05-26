@@ -195,3 +195,9 @@ Get the list of remotes URLs that are registered locally
 ```
 git remote -v
 ```
+
+## 2021-05
+See commits not pushed
+```
+git cherry -v origin/master
+```
