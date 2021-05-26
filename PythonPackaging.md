@@ -51,3 +51,14 @@ Dynamic mode: each new import will get the latest version
 ``` python
 python setup.py develop
 ```
+
+
+
+# Using conda
+```
+conda install conda-build
+```
+## Install the package in develop mode
+```
+conda develop .
+```
